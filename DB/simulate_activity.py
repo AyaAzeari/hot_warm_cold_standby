@@ -2,19 +2,40 @@ import sqlite3
 import time
 from random import randint
 
-DB_PATH = "/Users/ayaazeari/cybersecurity/DB/orders.db"
+dbpath = "/Users/ayaazeari/cybersecurity/DB/orders.db"
 
-def simulate_activity():
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
+def simulate():
+    db = sqlite3.connect(dbpath)
+    cur = db.cursor()
+    order_id = 0
 
-    while True:
-        # random order
-        c.execute("INSERT INTO orders (order_id, amount) VALUES (?, ?)", (randint(1000, 9999), randint(10, 500)))
-        c.execute("INSERT INTO reviews (review_id, comment) VALUES (?, ?)", (randint(1, 100), "Sample review"))
-        conn.commit()
-        print("Inserted data into orders and reviews tables.")
-        # Wait for 10 sec
-        time.sleep(10)
+    try:
+        while True:
+            order_id += 1
+            value = randint(10, 500)
+            cur.execute("INSERT INTO orders (order_id, amount) VALUES (?, ?)", (order_id, value))
+            db.commit()
+            print(f"Added order {order_id} for ${value}.")
+            if randint(1, 20) <= 5: 
+                add_review(cur, db, order_id)
+            sleep_time = randint(1, 30)
+            print(f"Waiting {sleep_time} seconds before the next order...")
+            time.sleep(sleep_time)
+            if order_id > 1 and randint(1, 20) <= 10: 
+                random_order_id = randint(1, order_id)
+                add_review(cur, db, random_order_id)
+
+    except KeyboardInterrupt:
+        print("Simulation stopped by user.")
+    finally:
+        db.close()
+
+def add_review(cur, db, order_id):
+    reviews = ["beautiful", "love it", "too small", "just like in the pic", "bad quality"]
+    comment = reviews[randint(0, len(reviews) - 1)]
+    cur.execute("INSERT INTO reviews (order_id, comment) VALUES (?, ?)", (order_id, comment))
+    db.commit()
+    print(f"Added review to order {order_id}: {comment}")
+
 if __name__ == "__main__":
-    simulate_activity()
+    simulate()
