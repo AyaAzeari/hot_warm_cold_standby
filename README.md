@@ -27,10 +27,24 @@ hot_warm_cold_standby/
 **1. Database Setup**
 
 We created a directory structure to organize the database and backups. The `DB` folder stores the active database (`orders.db`), while the `Backups` folder holds subdirectories for each standby method. Inside `orders.db`, we defined two tables: `orders` (stores transactions) and `reviews` (stores user reviews).
+```
+CREATE TABLE orders (
+    order_id INTEGER PRIMARY KEY,
+    amount INTEGER NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE reviews (
+    review_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER,
+    comment TEXT,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id)
+);
+```
 
 **2. Simulating Database Activity**
 
-A Python script (`simulate_activity.py`) generates random transactions and reviews, adding them to the database every 10 seconds. which helps simulate real-world database activity.
+A Python script (`simulate_activity.py`) generates random transactions and reviews, adding them to the database every couple of seconds. which helps simulate real-world database activity.
 
 **3. Recovery Strategies**
 
